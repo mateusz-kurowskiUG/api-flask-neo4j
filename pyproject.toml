@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "flaskneo4j"
+version = "0.1.0"
+description = ""
+authors = ["Mateusz Kurowski <m.kurowski.023@studms.ug.edu.pl>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31.0"
+asyncio = "^3.4.3"
+neo4j = "^5.14.1"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
