@@ -1,13 +1,9 @@
 from neo4j import GraphDatabase
 import sys, os
-from ..other.settings import find_config
+from src.other.settings import find_config
 import asyncio
-from src.db.data.create import (
-    queries,
-    example_data,
-    positions,
-    positions_with_departments,
-)
+import random
+from src.db.data.data import employees, queries
 import atexit
 
 # defining function to run on shutdown
@@ -28,30 +24,19 @@ class Db:
             print("ERROR!")
             raise SystemError("No credentials found, checks .env or platform ENVS")
         try:
-            (URI, AURA_PASSWD, USER) = creds
-            self.driver = GraphDatabase.driver(URI, auth=(USER, AURA_PASSWD))
+            (URI, AUTH) = creds
+            self.driver = GraphDatabase.driver(URI, auth=AUTH)
         except ConnectionError:
             print(
                 "Couldn't connect, check if connection variables are correct and internet connection"
             )
 
     def create_employees(self):
-        with self.driver.session() as session:
-            for employee, role in zip(
-                example_data["employees"], positions_with_departments
-            ):
-                position, department = role
-                # print(employee, role)
-                query_employee = (
-                    queries["create_employee"]
-                    .replace("$name", f"'{employee}'")
-                    .replace("$position", f"'{position}'")
-                )
-                session.run(query=query_employee)
+        for employee in employees:
+            self.driver.execute_query()
 
-                query_department = queries["create_department"].replace(
-                    "$name", f"'{department}'"
-                )
+    def close(self):
+        self.driver.close()
 
     def drop_db(self):
         with self.driver.session() as session:

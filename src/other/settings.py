@@ -6,4 +6,4 @@ def find_config():
     URI = os.environ.get("URI")
     AURA_PASSWD = os.environ.get("AURA_PASSWD")
     USER = os.environ.get("USER")
-    return URI, AURA_PASSWD, USER
+    return (URI, (USER, AURA_PASSWD))
