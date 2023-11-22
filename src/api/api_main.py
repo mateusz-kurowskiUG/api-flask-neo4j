@@ -1,11 +1,19 @@
 from flask import Flask, request
+from src.db.connect import Db
 
+db = Db()
+db.drop_db()
+db.create_employees()
 app = Flask(__name__)
-print(__name__)
 
 
 @app.get("/employees")
 def get_employees():
+    return "f"
+
+
+@app.get("/employees/<id>/subordinates")
+def get_seubordinates(id):
     ...
 
 
@@ -21,11 +29,6 @@ def put_employee(id):
 
 @app.delete("/employees/<id>")
 def delete_employee(id):
-    ...
-
-
-@app.get("/employees/<id>/subordinates")
-def get_seubordinates(id):
     ...
 
 
