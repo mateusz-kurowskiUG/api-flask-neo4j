@@ -118,14 +118,14 @@ class Db:
                                         "position2": colleague["position"],
                                     },
                                 )
-                                # self.driver.execute_query(
-                                #     queries["ADD_BOSS"], parameters_={**employee}
-                                # )
+                        # self.driver.execute_query(queries["ADD_BOSS"], parameters_={**employee})
 
-                    self.driver.execute_query(
-                        queries["CREATE_EMP_TO_DEP"].replace("$relation", "MANAGES"),
-                        parameters_=employee,
-                    )
+                        self.driver.execute_query(
+                            queries["CREATE_EMP_TO_DEP"].replace(
+                                "$relation", "MANAGES"
+                            ),
+                            parameters_=employee,
+                        )
 
         except Exception as e:
             print(e)
