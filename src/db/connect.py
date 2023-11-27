@@ -31,6 +31,33 @@ class Db:
                 "Couldn't connect, check if connection variables are correct and internet connection"
             )
 
+    def put_employee(self, id, name, last_name, position, department):
+        try:
+            parameters = {}
+            if id:
+                parameters["id"] = id
+            if name:
+                parameters["name"] = name
+            if last_name:
+                parameters["last_name"] = last_name
+            if position:
+                parameters["position"] = position
+            if department:
+                parameters["department"] = department
+            if len(parameters) != 5:
+                return "Please insert all of the arguments"
+            records, summary, keys = self.driver.execute_query(
+                queries["SET_EMPLOYEE_BY_ID"], parameters_=parameters
+            )
+            results = []
+            for record in records:
+                results.append(record.data())
+            if len(results) == 0:
+                return "Couldn't find employee with such ID"
+            return results
+        except Exception as e:
+            return e
+
     def get_employees(self, name, last_name, position, sort):
         try:
             params = []
@@ -126,9 +153,11 @@ class Db:
                             ),
                             parameters_=employee,
                         )
+            return True
 
         except Exception as e:
             print(e)
+            return False
 
     def close(self):
         self.driver.close()

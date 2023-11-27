@@ -12,6 +12,8 @@ asyncio = "^3.4.3"
 neo4j = "^5.14.1"
 python-dotenv = "^1.0.0"
 flask = "^3.0.0"
+setuptools = "^69.0.2"
+flasgger = "0.9.7b2"
 
 
 [build-system]

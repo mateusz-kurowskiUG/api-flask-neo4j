@@ -1,11 +1,13 @@
 from flask import Flask, request
 from src.db.connect import Db
 import json
+from flasgger import Swagger
 
 db = Db()
 db.drop_db()
-db.create_employees()
+is_created = db.create_employees()
 app = Flask(__name__)
+swagger = Swagger(app)
 
 
 @app.get("/employees")
@@ -34,7 +36,7 @@ def post_employees():
     position = json_data.get("position")
     department = json_data.get("department")
     if not name or not last_name or not position or not department:
-        return "Podaj wszystkie argumenty!", 403
+        return "All of the arguments must be given!", 403
 
     result = db.add_employee(name, last_name, position, department)
     if isinstance(result, str):
@@ -44,7 +46,27 @@ def post_employees():
 
 @app.put("/employees/<id>")
 def put_employee(id):
-    ...
+    if id is None or "":
+        return "No ID provided!", 404
+    try:
+        int_id = int(id)
+    except Exception as e:
+        return e, 403
+
+    json_data = request.json
+    name = json_data.get("name")
+    last_name = json_data.get("last_name")
+    position = json_data.get("position")
+    department = json_data.get("department")
+    if not name or not last_name or not position or not department:
+        return "All of the arguments must be given!", 404
+
+    result = db.put_employee(int_id, name, last_name, position, department)
+    if isinstance(result, Exception):
+        return str(result), 403
+    if isinstance(result, str):
+        return result, 404
+    return result, 200
 
 
 @app.delete("/employees/<id>")
