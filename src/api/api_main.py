@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from src.db.connect import Db
 import json
 from flasgger import Swagger
@@ -71,14 +71,42 @@ def put_employee(id):
 
 @app.delete("/employees/<id>")
 def delete_employee(id):
-    ...
+    if not id or not id.isdigit():
+        return ({"message": "ID is supposed to be INTEGER"}), 403
+    result = db.delete_employee(int(id))
+
+    if isinstance(result, Exception):
+        return jsonify(result), 500
+    if isinstance(result, str):
+        return jsonify(result), 404
+    if isinstance(result, list):
+        if len(result) == 0:
+            return "Couldn't find such an employee", 404
+        return jsonify(result), 200
+    return jsonify(result), 500
 
 
 @app.get("/departments")
 def get_departments():
-    ...
+    name = request.args.get("name")
+    sort = request.args.get("sort")
+    result = db.get_employees(name, sort)
+    if result is not None:
+        return json.dumps(result), 200
+    return "Error", 404
 
 
-@app.get("/departments/:id/employees")
+@app.get("/departments/<id>/employees")
 def get_employees_departments(id):
-    ...
+    if not id or not id.isdigit():
+        return ({"message": "ID is supposed to be INTEGER"}), 403
+    result = db.get_employees_by_department_id(int(id))
+    if isinstance(result, Exception):
+        return jsonify(result), 500
+    if isinstance(result, str):
+        return jsonify(result), 404
+    if isinstance(result, list):
+        if len(result) == 0:
+            return "Couldn't find such an employee", 404
+        return jsonify(result), 200
+    return jsonify(result), 500

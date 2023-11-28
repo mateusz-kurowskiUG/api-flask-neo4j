@@ -22,12 +22,36 @@ queries = {
     ORDER BY e$sort
     """,
     "SET_EMPLOYEE_BY_ID": """
-    MATCH(e:Employee {id:$id})
+    MATCH(e:Employee {id:$id}) -[pr]->(d:Department)
     MERGE (d:Department {name:$department})
     SET e.name = $name, e.last_name = $last_name,
     e.position = $position
     MERGE (e)-[r:WORKS_IN]->(d)
+    DELETE pr
     return e
+    """,
+    "DELETE_EMP": """
+    MATCH (e:Employee {id:$id})-[r]->(d:Department)
+    DETACH DELETE e
+    return d.id as id
+    """,
+    "GET_EMP_BY_DEP": """
+    MATCH (e:Employee)-[r:$relation]->(d:Department {id:$id})
+    return e
+    """,
+    "GET_SUBORDINATES": """
+    MATCH (e:Employee {id:$id})-[r:MANAGES]->(e2)
+    return e2
+    """,
+    "GET_MANAGER": """
+    MATCH (e:Employee)-[r:MANAGES]->(d:Department)
+    return e,
+    """,
+    "FIND_MANAGED_DEP": """
+    MATCH (e:Employee)
+    """,
+    "CHOSE_NEW_MANAGER": """
+    MATCH (e:Employee)-[r:WORKS_IN]->(d:Department)
     """,
 }
 

@@ -88,7 +88,48 @@ class Db:
                 results.append(record.data())
             return results
         except Exception as e:
-            print(e)
+            return e
+
+    def get_employees_by_department_id(self, id):
+        try:
+            records, summary, keys = self.driver.execute_query(
+                queries["GET_EMP_BY_DEP"].replace("$relation", "WORKS_IN"),
+                parameters_={"id": id},
+            )
+            match len(records):
+                case 0:
+                    return []
+                case _:
+                    results = [record.data() for record in records]
+                    return results
+
+        except Exception as e:
+            return e
+
+    def delete_employee(self, id):
+        try:
+            dep_id, summary, keys = self.driver.execute_query(
+                queries["DELETE_EMP"], parameters_={"id": id}
+            )
+            dep_id = [record.data() for record in dep_id]
+            if len(dep_id) == 0:
+                return "no employee found"
+            dep_id = dep_id[0]
+            managers, summary, keys = self.driver.execute_query(
+                queries["GET_MANAGER"], parameters_={"id": dep_id}
+            )
+            managers = [record.data() for record in managers]
+            match len(managers):
+                case 0:
+                    # if 0 employees - delete dep
+                    # else chose new manager
+                    self.driver.execute_query(queries["GET_EMP_BY_DEP"], parameters_={})
+                case _:
+                    return managers
+            results = [record.data() for record in records]
+            return results
+        except Exception as e:
+            return e
 
     def add_employee(self, name, last_name, position, department):
         try:
@@ -117,18 +158,17 @@ class Db:
                 results.append(record.data())
             return results
         except Exception as e:
-            print(e)
+            return e
 
     def create_employees(self):
         try:
+            done_departments = []
             for employee in employees:
                 self.driver.execute_query(
                     queries["CREATE_EMP_TO_DEP"].replace("$relation", "WORKS_IN"),
                     parameters_=employee,
                 )
 
-            done_departments = []
-            for employee in employees:
                 if employee["department"] not in done_departments:
                     done_departments.append(employee["department"])
                     for colleague in employees:
