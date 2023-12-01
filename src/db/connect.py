@@ -106,30 +106,63 @@ class Db:
         except Exception as e:
             return e
 
-    def delete_employee(self, id):
+    def delete_employee(self, emp_id):
         try:
-            dep_id, summary, keys = self.driver.execute_query(
-                queries["DELETE_EMP"], parameters_={"id": id}
+            # Step 1: Delete the employee
+            emp_result, emp_summary, _ = self.driver.execute_query(
+                queries["DELETE_EMP"], parameters_={"id": emp_id}
             )
-            dep_id = [record.data() for record in dep_id]
-            if len(dep_id) == 0:
-                return "no employee found"
-            dep_id = dep_id[0]
-            managers, summary, keys = self.driver.execute_query(
-                queries["GET_MANAGER"], parameters_={"id": dep_id}
+
+            if emp_summary.counters.nodes_deleted == 0:
+                return "No employee found for deletion."
+
+            if not emp_result:
+                return "Could not find employee ERROR!!"
+
+            dep_id = emp_result[0].data()
+            # Step 3: Get managers of the department
+            managers_result, _, _ = self.driver.execute_query(
+                queries["GET_MANAGER"], parameters_={"id": dep_id["id"]}
             )
-            managers = [record.data() for record in managers]
-            match len(managers):
-                case 0:
-                    # if 0 employees - delete dep
-                    # else chose new manager
-                    self.driver.execute_query(queries["GET_EMP_BY_DEP"], parameters_={})
-                case _:
-                    return managers
-            results = [record.data() for record in records]
-            return results
+            # Step 4: Check if there are no managers and there are other employees
+            emp_count_result, _, _ = self.driver.execute_query(
+                queries["GET_EMP_BY_DEP"].replace("$relation", "WORKS_IN"),
+                parameters_={"id": dep_id["id"]},
+            )
+            if len(managers_result) == 0 and len(emp_count_result) != 0:
+                # If no managers but there are other employees, promote the first employee
+                employee_to_promote_id = emp_count_result[0].data()["e"]
+                promotion_result, _, _ = self.driver.execute_query(
+                    queries["PROMOTE_EMP"],
+                    parameters_={
+                        "emp_id": employee_to_promote_id["id"],
+                        "dep_id": dep_id["id"],
+                    },
+                )
+
+                if promotion_result:
+                    prom = self.driver.execute_query(
+                        queries["PROMOTE_EMP2"].replace(
+                            "$manager_id", f"{employee_to_promote_id["id"]}"
+                        ),
+                        parameters_={
+                            "emp_id": employee_to_promote_id["id"],
+                            "dep_id": dep_id["id"],
+                        },
+                    )
+                    if prom:
+                        return f"{promotion_result[0].data()} has become the new manager of department {dep_id}"
+                    else:
+                        return "Error promoting employee to manager."
+
+                else:
+                    return "Error promoting employee to manager."
+
+            # Step 5: If managers exist or there are no other employees, no further action needed
+            return "Successfully deleted Employee."
+
         except Exception as e:
-            return e
+            return str(e)
 
     def add_employee(self, name, last_name, position, department):
         try:

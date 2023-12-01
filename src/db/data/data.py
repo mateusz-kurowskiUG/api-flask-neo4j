@@ -1,6 +1,7 @@
 import json
 
 queries = {
+    "CONSTRAINT": "CREATE CONSTRAINT ON (n:player) ASSERT n.id IS UNIQUE",
     "CREATE_EMP_TO_DEP": """
     MERGE (e:Employee {name:$name, last_name:$last_name, position:$position})
     MERGE (d:Department {name:$department})
@@ -23,10 +24,10 @@ queries = {
     """,
     "SET_EMPLOYEE_BY_ID": """
     MATCH(e:Employee {id:$id}) -[pr]->(d:Department)
-    MERGE (d:Department {name:$department})
+    MERGE (d2:Department {name:$department})
     SET e.name = $name, e.last_name = $last_name,
     e.position = $position
-    MERGE (e)-[r:WORKS_IN]->(d)
+    MERGE (e)-[r:WORKS_IN]->(d2)
     DELETE pr
     return e
     """,
@@ -44,14 +45,38 @@ queries = {
     return e2
     """,
     "GET_MANAGER": """
-    MATCH (e:Employee)-[r:MANAGES]->(d:Department)
-    return e,
+    MATCH (e:Employee)-[r:MANAGES]->(d:Department {id:$id})
+    return e
     """,
     "FIND_MANAGED_DEP": """
     MATCH (e:Employee)
     """,
     "CHOSE_NEW_MANAGER": """
     MATCH (e:Employee)-[r:WORKS_IN]->(d:Department)
+    """,
+    "DELETE_DEP": """
+    MATCH (d:Department {id:$id})
+    return d
+    """,
+    "GET_ONE_EMP_BY_DEP": """
+    MATCH (e:Employee)-[r:WORKS_IN]->(d:Department{id:$id})
+    return e.id
+    limit 1
+    """,
+    "PROMOTE_EMP": """
+    MATCH (e:Employee {id:$emp_id})-[r:WORKS_IN]->(d:Department {id:$dep_id})
+    CREATE (e)-[r2:MANAGES]->(d)
+    return e
+    """,
+    "PROMOTE_EMP2": """
+    MATCH (e:Employee {id:$emp_id}), (e2:Employee)-[r:WORKS_IN]->(d:Department {id:$dep_id})
+    WHERE e2.id <> $manager_id
+    CREATE (e)-[r2:MANAGES]->(e2)
+    return e
+    """,
+    "GET_DEP_ID_BY_EMP": """
+    MATCH (e:Employee)-[r]->(d:Department {id:$id})
+    return d.id
     """,
 }
 

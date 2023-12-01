@@ -4,8 +4,8 @@ import json
 from flasgger import Swagger
 
 db = Db()
-db.drop_db()
-is_created = db.create_employees()
+# db.drop_db()
+# is_created = db.create_employees()
 app = Flask(__name__)
 swagger = Swagger(app)
 
@@ -77,18 +77,13 @@ def delete_employee(id):
 
     if isinstance(result, Exception):
         return jsonify(result), 500
-    if isinstance(result, str):
-        return jsonify(result), 404
-    if isinstance(result, list):
-        if len(result) == 0:
-            return "Couldn't find such an employee", 404
-        return jsonify(result), 200
-    return jsonify(result), 500
+    return jsonify(result), 200
 
 
 @app.get("/departments")
 def get_departments():
     name = request.args.get("name")
+    count = request.args.get("name")
     sort = request.args.get("sort")
     result = db.get_employees(name, sort)
     if result is not None:
