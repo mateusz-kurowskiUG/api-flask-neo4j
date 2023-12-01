@@ -41,7 +41,7 @@ queries = {
     return e
     """,
     "GET_SUBORDINATES": """
-    MATCH (e:Employee {id:$id})-[r:MANAGES]->(e2)
+    MATCH (e:Employee {id:$id})-[r:MANAGES]->(e2:Employee)
     return e2
     """,
     "GET_MANAGER": """
@@ -78,6 +78,25 @@ queries = {
     MATCH (e:Employee)-[r]->(d:Department {id:$id})
     return d.id
     """,
+    "GET_DEPARTMENTS": """
+        MATCH (e:Employee)-[r]-> (d:Department $params)
+        WITH d, count(e) AS count
+        $count
+        return d,count
+        $sort
+    """,
+    "COUNT_EMP_BY_DEP": """
+    MATCH (e:Employee)-[r:]->(d: {id:$id})
+    WITH count(e) AS cnt
+    WHERE cnt
+    """,
+    "GET_EMP_INFO": """
+    MATCH (e:Employee {id:$id})-[r]->(d:Department)
+    MATCH (e2:Employee)-[r2:WORKS_IN]->(d)
+    MATCH (m:Employee)-[r3:MANAGES]->(d)
+    WITH m,d,count(e2) as count
+    return m.name as imie_managera, m.last_name as nazwisko_managera, d.name as nazwa_departamentu, count as liczba_pracownikow
+    """
 }
 
 

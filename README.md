@@ -11,22 +11,22 @@ API with Flask and Neo4j
 
 Dokumentacja:
 
-1. GET /employees
+3. GET /employees
    optional params:
    name
    last_name
    postition
    sort = name of the field e.g name || last_name || position
 
-2. POST /employees
-   body:{
-   name
-   last_name
-   position
-   department
-   }
+4 POST /employees
+body:{
+name
+last_name
+position
+department
+}
 
-3. PUT /employees/:id
+5. PUT /employees/:id
    all required!
    body:{
    name
@@ -35,17 +35,22 @@ Dokumentacja:
    department
    }
 
-4.DELETE /employees/:id
+6.DELETE /employees/:id
 nothing to pass
 
-5. GET /employees/:id/subordinates
- nothing to pass
+7.GET /employees/:id/subordinates
+nothing to pass
 
- 6. get /departments
- optional:
- {
-   name='dep_name'
-   count=True
-   sort=field e.g name
- }
- 7. get /departments/:id/employees
+8. GET /employees/:id
+   nothing to pass
+   returns:
+   name_of_manager, last_name_of_manager, name_of_department, no_employees_of_department
+
+9.get /departments
+optional:
+{
+id=number
+name=string
+sort= (name || id || count) + DESC e.g sort="name DESC" or sort="count"
+count= number
+} 10. get /departments/:id/employees

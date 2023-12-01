@@ -1,5 +1,6 @@
 from neo4j import GraphDatabase
-import sys, os
+import sys
+import os
 from src.other.settings import find_config
 import asyncio
 import random
@@ -22,7 +23,8 @@ class Db:
         creds = find_config()
         if not all(var is not None for var in creds):
             print("ERROR!")
-            raise SystemError("No credentials found, checks .env or platform ENVS")
+            raise SystemError(
+                "No credentials found, checks .env or platform ENVS")
         try:
             (URI, AUTH) = creds
             self.driver = GraphDatabase.driver(URI, auth=AUTH)
@@ -30,6 +32,51 @@ class Db:
             print(
                 "Couldn't connect, check if connection variables are correct and internet connection"
             )
+
+    def get_departments(self, id, name, count, sort):
+        params = []
+        if isinstance(id, int) or (isinstance(id, str) and id.isdecimal()):
+            params.append(f"id:{id}")
+        if isinstance(name, str) and len(name) > 0:
+            params.append(f"name:'{name}'")
+        params_str = "{" + ",".join(params) + "}"
+        if sort is None:
+            sort = ""
+        elif sort not in ['name', 'id', 'count', 'name DESC', 'id DESC', 'count DESC']:
+            return Exception({"message": "sort property is supposed to be field of :Department or count property"})
+        else:
+            if sort not in ['count', 'count DESC']:
+                sort = f"d.{sort}"
+            sort = f"ORDER BY {sort}"
+        if count is None:
+            count = ""
+        elif not isinstance(count, int) or (isinstance(count, str) and count.isdigit()):
+            return Exception({"message": "Count is supposed to be a number!"})
+        else:
+            if isinstance(count, str):
+                count = int(count)
+            count = f"WHERE count = {count}"
+        deps, summary, keys = self.driver.execute_query(
+            queries["GET_DEPARTMENTS"].replace("$params", params_str).replace("$sort", sort).replace("$count", count))
+        results = [record.data() for record in deps]
+        return results
+
+    def get_employee_info(self, id):
+        try:
+            records, summary, keys = self.driver.execute_query(
+                queries["GET_EMP_INFO"], parameters_={"id": id})
+
+            return [record.data() for record in records]
+        except Exception as e:
+            return e
+
+    def get_subordinates(self, id):
+        try:
+            records, summary, keys = self.driver.execute_query(
+                queries["GET_SUBORDINATES"], parameters_={"id": id})
+            return [record.data() for record in records]
+        except Exception as e:
+            return e
 
     def put_employee(self, id, name, last_name, position, department):
         try:
@@ -92,6 +139,7 @@ class Db:
 
     def get_employees_by_department_id(self, id):
         try:
+
             records, summary, keys = self.driver.execute_query(
                 queries["GET_EMP_BY_DEP"].replace("$relation", "WORKS_IN"),
                 parameters_={"id": id},
@@ -108,7 +156,6 @@ class Db:
 
     def delete_employee(self, emp_id):
         try:
-            # Step 1: Delete the employee
             emp_result, emp_summary, _ = self.driver.execute_query(
                 queries["DELETE_EMP"], parameters_={"id": emp_id}
             )
@@ -120,17 +167,14 @@ class Db:
                 return "Could not find employee ERROR!!"
 
             dep_id = emp_result[0].data()
-            # Step 3: Get managers of the department
             managers_result, _, _ = self.driver.execute_query(
                 queries["GET_MANAGER"], parameters_={"id": dep_id["id"]}
             )
-            # Step 4: Check if there are no managers and there are other employees
             emp_count_result, _, _ = self.driver.execute_query(
                 queries["GET_EMP_BY_DEP"].replace("$relation", "WORKS_IN"),
                 parameters_={"id": dep_id["id"]},
             )
             if len(managers_result) == 0 and len(emp_count_result) != 0:
-                # If no managers but there are other employees, promote the first employee
                 employee_to_promote_id = emp_count_result[0].data()["e"]
                 promotion_result, _, _ = self.driver.execute_query(
                     queries["PROMOTE_EMP"],
@@ -153,12 +197,13 @@ class Db:
                     if prom:
                         return f"{promotion_result[0].data()} has become the new manager of department {dep_id}"
                     else:
+
                         return "Error promoting employee to manager."
 
                 else:
+
                     return "Error promoting employee to manager."
 
-            # Step 5: If managers exist or there are no other employees, no further action needed
             return "Successfully deleted Employee."
 
         except Exception as e:
@@ -198,7 +243,8 @@ class Db:
             done_departments = []
             for employee in employees:
                 self.driver.execute_query(
-                    queries["CREATE_EMP_TO_DEP"].replace("$relation", "WORKS_IN"),
+                    queries["CREATE_EMP_TO_DEP"].replace(
+                        "$relation", "WORKS_IN"),
                     parameters_=employee,
                 )
 

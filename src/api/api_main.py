@@ -23,8 +23,19 @@ def get_employees():
 
 
 @app.get("/employees/<id>/subordinates")
-def get_seubordinates(id):
-    ...
+def get_subordinates(id):
+    if not isinstance(id, int):
+        if isinstance(id, str) and id.isdecimal():
+            id = int(id)
+        else:
+            return "ID IS SUPPOSED TO BE INTEGER!", 403
+
+    result = db.get_subordinates(id)
+
+    if isinstance(result, Exception):
+        return result, 500
+
+    return jsonify(result), 200
 
 
 @app.post("/employees")
@@ -42,6 +53,22 @@ def post_employees():
     if isinstance(result, str):
         return result, 403
     return result, 200
+
+
+@app.get("/employees/<id>")
+def get_employee_info(id):
+    if not isinstance(id, int):
+        if isinstance(id, str) and id.isdecimal():
+            id = int(id)
+        else:
+            return "ID IS SUPPOSED TO BE INTEGER!", 403
+
+    result = db.get_employee_info(id)
+
+    if isinstance(result, Exception):
+        return result, 500
+
+    return jsonify(result), 200
 
 
 @app.put("/employees/<id>")
@@ -82,10 +109,13 @@ def delete_employee(id):
 
 @app.get("/departments")
 def get_departments():
-    name = request.args.get("name")
-    count = request.args.get("name")
-    sort = request.args.get("sort")
-    result = db.get_employees(name, sort)
+    dep_id = request.json.get("id")
+    name = request.json.get("name")
+    count = request.json.get("count")
+    sort = request.json.get("sort")
+    result = db.get_departments(dep_id, name, count, sort)
+    if isinstance(result, Exception):
+        return jsonify(result.args), 500
     if result is not None:
         return json.dumps(result), 200
     return "Error", 404
