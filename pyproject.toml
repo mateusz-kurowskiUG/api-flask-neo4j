@@ -6,7 +6,7 @@ authors = ["Mateusz Kurowski <m.kurowski.023@studms.ug.edu.pl>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11.6"
 requests = "^2.31.0"
 asyncio = "^3.4.3"
 neo4j = "^5.14.1"
