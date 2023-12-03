@@ -1,1 +1,1 @@
-web: python -m flask --app src.api.api_main run
+web: python -m src.api.api_main
