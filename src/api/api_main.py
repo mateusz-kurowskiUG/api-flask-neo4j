@@ -138,3 +138,7 @@ def get_employees_departments(id):
             return "Couldn't find such an employee", 404
         return jsonify(result), 200
     return jsonify(result), 500
+
+
+if __name__ == "__main__":
+    app.run()
