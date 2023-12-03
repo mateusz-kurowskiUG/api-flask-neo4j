@@ -6,7 +6,9 @@ import os
 db = Db()
 # db.drop_db()
 # is_created = db.create_employees()
-PORT = int(os.getenv('PORT'))
+PORT = int(
+    os.environ.get('PORT', 33507)
+)
 app = Flask(__name__)
 
 
