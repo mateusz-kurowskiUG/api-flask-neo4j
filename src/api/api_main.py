@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 from src.db.connect import Db
 import json
 import dotenv
+import os
 db = Db()
 # db.drop_db()
 # is_created = db.create_employees()
+PORT = int(os.getenv('PORT'))
 app = Flask(__name__)
 
 
@@ -146,4 +148,4 @@ def get_employees_departments(id):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=PORT)
