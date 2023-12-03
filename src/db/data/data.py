@@ -19,7 +19,7 @@ queries = {
     # "ADD_BOSS": "MERGE (p {name:'Alan', last_name:'Key', position:'President'})-[r:MANAGES]->(e:Employee {name:$name, last_name:$last_name, position:$position})",
     "GET_EMPLOYEES": """
     MATCH (e:Employee $params)
-    return e
+    return e.id, e.name, e.last_name, e.position
     ORDER BY e$sort
     """,
     "SET_EMPLOYEE_BY_ID": """
@@ -80,9 +80,9 @@ queries = {
     """,
     "GET_DEPARTMENTS": """
         MATCH (e:Employee)-[r]-> (d:Department $params)
-        WITH d, count(e) AS count
+        WITH d, count(e) AS liczba_pracownikow
         $count
-        return d,count
+        return d.id as department_id, d.name as department_name, liczba_pracownikow
         $sort
     """,
     "COUNT_EMP_BY_DEP": """
@@ -101,7 +101,7 @@ queries = {
 
 
 def find_data():
-    with open("src\db\data\MOCK_DATA.json") as file:
+    with open("src/db/data/MOCK_DATA.json") as file:
         data = json.load(file)
         return data
 

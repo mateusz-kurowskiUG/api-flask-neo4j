@@ -1,21 +1,6 @@
 from neo4j import GraphDatabase
-import sys
-import os
 from src.other.settings import find_config
-import asyncio
-import random
 from src.db.data.data import employees, queries
-import atexit
-
-# defining function to run on shutdown
-# def close_running_threads():
-#     for thread in the_threads:
-#         thread.join()
-#     print "Threads complete, ready to finish"
-# #Register the function to be called on exit
-# atexit.register(close_running_threads)
-# #start your process
-# app.run()
 
 
 class Db:
@@ -27,6 +12,7 @@ class Db:
                 "No credentials found, checks .env or platform ENVS")
         try:
             (URI, AUTH) = creds
+            print(URI, AUTH)
             self.driver = GraphDatabase.driver(URI, auth=AUTH)
         except ConnectionError:
             print(

@@ -1,11 +1,10 @@
 from flask import Flask, request, jsonify
 from src.db.connect import Db
 import json
-from flasgger import Swagger
 
 db = Db()
-db.drop_db()
-is_created = db.create_employees()
+# db.drop_db()
+# is_created = db.create_employees()
 app = Flask(__name__)
 
 
@@ -67,6 +66,9 @@ def get_employee_info(id):
     if isinstance(result, Exception):
         return result, 500
 
+    if len(result) == 0:
+        return jsonify({"data": "no data"}), 200
+
     return jsonify(result), 200
 
 
@@ -108,15 +110,17 @@ def delete_employee(id):
 
 @app.get("/departments")
 def get_departments():
-    dep_id = request.json.get("id")
-    name = request.json.get("name")
-    count = request.json.get("count")
-    sort = request.json.get("sort")
+    dep_id = request.args.get("id")
+    name = request.args.get("name")
+    count = request.args.get("count")
+    sort = request.args.get("sort")
     result = db.get_departments(dep_id, name, count, sort)
     if isinstance(result, Exception):
         return jsonify(result.args), 500
     if result is not None:
-        return json.dumps(result), 200
+        if len(result) == 0:
+            return jsonify({"subordinates": "no subordinates"}), 200
+        return jsonify(result), 200
     return "Error", 404
 
 
