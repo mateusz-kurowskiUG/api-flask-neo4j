@@ -1,11 +1,16 @@
 from flask import Flask, request, jsonify
 from src.db.connect import Db
 import json
-
+import dotenv
 db = Db()
 # db.drop_db()
 # is_created = db.create_employees()
 app = Flask(__name__)
+
+
+@app.get("/")
+def start():
+    return "Please choose an endpoint"
 
 
 @app.get("/employees")
