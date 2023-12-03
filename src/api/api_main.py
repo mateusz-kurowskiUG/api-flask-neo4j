@@ -7,7 +7,6 @@ db = Db()
 db.drop_db()
 is_created = db.create_employees()
 app = Flask(__name__)
-swagger = Swagger(app)
 
 
 @app.get("/employees")
