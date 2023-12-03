@@ -173,7 +173,7 @@ class Db:
                 if promotion_result:
                     prom = self.driver.execute_query(
                         queries["PROMOTE_EMP2"].replace(
-                            "$manager_id", f"{employee_to_promote_id["id"]}"
+                            "$manager_id", f"{employee_to_promote_id['id']}"
                         ),
                         parameters_={
                             "emp_id": employee_to_promote_id["id"],
